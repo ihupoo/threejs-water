@@ -6,8 +6,8 @@
     "author": "ihupoo <840499492@qq.com>",
     "license": "MIT",
     "scripts": {
-        "dev": "webpack-dev-server --config config/webpack.dev.conf.js --mode development",
-        "build": "webpack --config config/webpack.prod.conf.js --mode production"
+        "dev": "cross-env NODE_ENV=development webpack-dev-server --config config/webpack.dev.conf.js --mode development",
+        "build": "cross-env NODE_ENV=production webpack --config config/webpack.prod.conf.js --mode production"
     },
     "devDependencies": {
         "autoprefixer": "^8.6.3",
