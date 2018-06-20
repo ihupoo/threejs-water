@@ -10,7 +10,7 @@ let styleScss = new ExtractTextWebpackPlugin('css/style2.css');
 module.exports = {
     entry: './index.js',
     output: {
-        filename: '[name].[hash:4].js', //打包后名称
+        filename: '[name].js', //打包后名称
         path: path.resolve(__dirname, '../dist') //打包后路径
     },
     resolve: {
@@ -69,7 +69,6 @@ module.exports = {
         new HtmlWebpackPlugin({
             filename: 'index.html', //目标文件
             template: './index.html', //模板
-            hash: true,
             chunks: ['vendor', 'index'] // 对应关系，index.js对应的是index.html
         }),
         new webpack.ProvidePlugin({
