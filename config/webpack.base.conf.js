@@ -11,7 +11,7 @@ module.exports = {
     entry: './index.js',
     output: {
         filename: '[name].[hash:4].js', //打包后名称
-        path: path.resolve(__dirname, './dist') //打包后路径
+        path: path.resolve(__dirname, '../dist') //打包后路径
     },
     resolve: {
         extensions: ['.js', '.json', '.css'], //可省后缀
@@ -92,12 +92,13 @@ module.exports = {
                     chunks: 'all',
                     name: 'utils',
                     minSize: 0, // 只要超出0字节就生成一个新包
-                    minChucks: 2 //至少两个chucks用到
+                    minChunks: 2 //至少两个chucks用到
                 }
             }
         },
         runtimeChunk: { //提取webpack运行时的代码
             name: 'manifest'
         }
-    },
+    }
+
 }
