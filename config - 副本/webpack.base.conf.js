@@ -2,10 +2,18 @@ const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
+// 拆分css,会把css文件放到dist目录下的css/style.css,以link的方式引入css
+const ExtractTextWebpackPlugin = require('extract-text-webpack-plugin');
+let styleCss = new ExtractTextWebpackPlugin({
+    filename: 'css/style.css',
+    allChunks: true
+});
+let styleScss = new ExtractTextWebpackPlugin('css/style2.css');
+
 module.exports = {
     entry: {
         index: './src/index.js',
-        // main: './src/main.js' //多页面设置，同时plugins需要加上一个新的HtmlWebpackPlugin
+        // main: './main.js'
     },
     output: {
         filename: '[name].js', //打包后名称
