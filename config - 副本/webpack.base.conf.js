@@ -2,38 +2,52 @@ const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
+// 拆分css,会把css文件放到dist目录下的css/style.css,以link的方式引入css
+const ExtractTextWebpackPlugin = require('extract-text-webpack-plugin');
+let styleCss = new ExtractTextWebpackPlugin({
+    filename: 'css/style.css',
+    allChunks: true
+});
+let styleScss = new ExtractTextWebpackPlugin('css/style2.css');
+
 module.exports = {
     entry: {
         index: './src/index.js',
-        // main: './src/main.js'    //多页面设置直接添加即可，同时plugins需要加上一个新的HtmlWebpackPlugin
+        // main: './main.js'
     },
     output: {
         filename: '[name].js', //打包后名称
         path: path.resolve(__dirname, '../dist'), //打包后路径
     },
     resolve: {
-        mainFields: ['jsnext:main', 'browser', 'main'], //配合tree-shaking，优先使用es6模块化入口（import）
+        mainFields: ['jsnext:main', 'browser', 'main'], //tree-shaking
         extensions: ['.js', '.json', '.css'], //可省后缀
         alias: {
             '@': path.resolve(__dirname, '../src') //别名
         }
     },
     module: {
-
-        noParse: /three\.js/, //这些库都是不依赖其它库的库 不需要解析他们可以加快编译速度
         rules: [{
                 test: /\.js$/,
                 use: 'babel-loader',
-                // include: /src/,   //只转化src目录下js
+                // include: /src/, //只转化src目录下js
                 exclude: /node_modules/ //不转化node_modules目录下js
             },
             {
                 test: /\.css$/,
-                use: ['style-loader', 'css-loader', 'postcss-loader']
+                use: styleCss.extract({
+                    fallback: "style-loader", // 样式没有被抽取时 style-loader 
+                    use: ['css-loader', 'postcss-loader'], // 将css用link的方式引入就不再需要style-loader了
+                    publicPath: '../' //与url-loader里的outputPath对应，这样可以根据相对路径引用图片资源
+                })
             },
             {
                 test: /\.scss$/,
-                use: ['style-loader', 'css-loader', 'postcss-loader', 'sass-loader']
+                use: styleScss.extract({
+                    fallback: "style-loader",
+                    use: ['css-loader', 'postcss-loader', 'sass-loader'],
+                    publicPath: '../'
+                })
             },
             {
                 test: /\.(html|htm)$/,
@@ -57,12 +71,14 @@ module.exports = {
         ]
     },
     plugins: [
+        styleCss,
+        styleScss,
         new HtmlWebpackPlugin({
             filename: 'index.html', //目标文件
             template: './src/index.html', //模板
-            chunks: ['manifest', 'vendor', 'utils', 'index'] //对应关系，index.js对应的是index.html
+            chunks: ['manifest', 'vendor', 'utils', 'index'] // 对应关系，index.js对应的是index.html
         }),
-        new webpack.ProvidePlugin({ //自动加载模块，而不必到处 import 或 require
+        new webpack.ProvidePlugin({
             'THREE': 'three'
         })
     ],
@@ -86,8 +102,7 @@ module.exports = {
                 }
             }
         },
-        //提取webpack运行时的代码
-        runtimeChunk: {
+        runtimeChunk: { //提取webpack运行时的代码
             name: 'manifest'
         }
     }

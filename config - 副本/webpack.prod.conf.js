@@ -1,8 +1,7 @@
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const merge = require('webpack-merge');
 const path = require("path");
-const base = require('./webpack.base.conf');
-// const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const base = require('./webpack.base.conf')
 
 module.exports = merge(base, {
     output: {
@@ -12,8 +11,7 @@ module.exports = merge(base, {
         new CleanWebpackPlugin('dist', {
             root: path.resolve(__dirname, '../'),
             verbose: true
-        }),
-        // new BundleAnalyzerPlugin()
+        })
     ],
     mode: 'production'
 })

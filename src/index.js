@@ -1,3 +1,14 @@
+import THREE from 'three';
+import './css/index.css'
+
+console.log("d222d")
+
+window.onload = function() {
+    var cccc = document.getElementById("cc")
+    cccc.innerHTML = "12dad3123";
+    console.log("d13f")
+}
+
 // class ThreeDemo{
 //     constructor(opts){
 //         this.container = opts.el;
@@ -27,7 +38,6 @@
 
 //     })
 // }
-
 
 if (module.hot) {
     module.hot.accept()
