@@ -5,7 +5,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports = {
     entry: {
         index: './src/index.js',
-        // main: './src/main.js'    //多页面设置直接添加即可，同时plugins需要加上一个新的HtmlWebpackPlugin
+        // main: './src/main.js' //多页面设置，同时plugins需要加上一个新的HtmlWebpackPlugin
     },
     output: {
         filename: '[name].js', //打包后名称
