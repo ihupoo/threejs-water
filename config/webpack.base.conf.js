@@ -19,21 +19,12 @@ module.exports = {
         }
     },
     module: {
-
         noParse: /three\.js/, //这些库都是不依赖其它库的库 不需要解析他们可以加快编译速度
         rules: [{
                 test: /\.js$/,
-                use: 'babel-loader',
+                use: 'babel-loader?cacheDirectory=true',
                 // include: /src/,   //只转化src目录下js
                 exclude: /node_modules/ //不转化node_modules目录下js
-            },
-            {
-                test: /\.css$/,
-                use: ['style-loader', 'css-loader', 'postcss-loader']
-            },
-            {
-                test: /\.scss$/,
-                use: ['style-loader', 'css-loader', 'postcss-loader', 'sass-loader']
             },
             {
                 test: /\.(html|htm)$/,
@@ -68,7 +59,9 @@ module.exports = {
     ],
     optimization: {
         splitChunks: {
-            chunks: 'all',
+            chunks: 'all', //'all'|'async'|'initial'(全部|按需加载|初始加载)的chunks
+            // maxAsyncRequests: 1,                     // 最大异步请求数， 默认1
+            // maxInitialRequests: 1,                   // 最大初始化请求书，默认1
             cacheGroups: {
                 // 抽离第三方插件
                 vendor: {
@@ -82,7 +75,9 @@ module.exports = {
                     chunks: 'all',
                     name: 'utils',
                     minSize: 0, // 只要超出0字节就生成一个新包
-                    minChunks: 2 //至少两个chucks用到
+                    minChunks: 2, //至少两个chucks用到
+                    // maxAsyncRequests: 1,             // 最大异步请求数， 默认1
+                    maxInitialRequests: 5, // 最大初始化请求书，默认1
                 }
             }
         },

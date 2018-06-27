@@ -1,4 +1,5 @@
 import THREE from 'three';
+import './css/app.scss'
 import './css/index.css'
 
 console.log("d222d")
