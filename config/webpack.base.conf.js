@@ -15,7 +15,8 @@ module.exports = {
         mainFields: ['jsnext:main', 'browser', 'main'], //配合tree-shaking，优先使用es6模块化入口（import）
         extensions: ['.js', '.json', '.css'], //可省后缀
         alias: {
-            '@': path.resolve(__dirname, '../src') //别名
+            '@': path.resolve(__dirname, '../src'), //别名
+            'lib': path.resolve(__dirname, '../lib') //别名
         }
     },
     module: {
