@@ -1,6 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
     entry: {
@@ -12,7 +13,7 @@ module.exports = {
         path: path.resolve(__dirname, '../dist'), //打包后路径
     },
     resolve: {
-        mainFields: ['jsnext:main', 'browser', 'main'], //配合tree-shaking，优先使用es6模块化入口（import）
+        mainFields: ['jsnext:main', 'browser', 'main'], //配合tree-shaking，优先使用es6模块化入口（import）,babelrc里需要 modules:false
         extensions: ['.js', '.json', '.css'], //可省后缀
         alias: {
             '@': path.resolve(__dirname, '../src'), //别名
@@ -56,7 +57,10 @@ module.exports = {
         }),
         new webpack.ProvidePlugin({ //自动加载模块，而不必到处 import 或 require
             'THREE': 'three'
-        })
+        }),
+        new CopyWebpackPlugin([
+            { from: './src/obj', to: 'obj' }
+        ])
     ],
     optimization: {
         splitChunks: {

@@ -1,7 +1,7 @@
 {
     "presets": [
         ["env", {
-            "modules": false,
+            // "modules": false,
             "targets": {
                 "browsers": ["> 5%", "last 2 versions", "not ie <= 8"]
             }
