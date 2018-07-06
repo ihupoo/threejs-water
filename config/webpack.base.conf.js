@@ -46,6 +46,10 @@ module.exports = {
                         name: '[name].[hash:7].[ext]'
                     }
                 }]
+            },
+            {
+                test: /\.glsl$/,
+                use: 'webpack-glsl-loader'
             }
         ]
     },

@@ -12,6 +12,9 @@ import 'lib/OBJLoader.js'
 
 import crate from './img/crate.jpg'
 
+import vertexShader from './glsl/vertex.glsl'
+import fragmentShader from './glsl/fragment.glsl'
+
 class ThreeDemo {
     constructor(opts) {
         this.container = opts.el;
@@ -188,6 +191,9 @@ class ThreeDemo {
             fbx1.rotateX(-Math.PI / 2);
             fbx1.position.y -= 30;
 
+            let myobj = new THREE.Object3D();
+            myobj.add(fbx1)
+
             let monu = texture[2];
             monu.position.set(0, -30, 0);
 
@@ -208,11 +214,10 @@ class ThreeDemo {
                 }
             });
 
-            let myobj = new THREE.Object3D();
-            myobj.add(fbx1)
 
-            this.onShadow(myobj)
-            this.onShadow(monu)
+
+            // this.onShadow(myobj)
+            // this.onShadow(monu)
 
 
             // this.scene.add(box1);
@@ -220,15 +225,22 @@ class ThreeDemo {
             // this.scene.add(monu);
 
 
-            this.addMouseListener([myobj, monu]); //鼠标事件
+            // this.addMouseListener([myobj, monu]); //鼠标事件
 
             let ball = new THREE.SphereGeometry(40, 20, 20)
             let pMaterial = new THREE.PointsMaterial({
                 color: '#f0f0f0',
                 size: 2
             });
-            let pSystem = new THREE.ParticleSystem(ball, pMaterial)
-            this.scene.add(pSystem)
+            let pSystem = new THREE.Points(ball, pMaterial)
+                // this.scene.add(pSystem)
+
+
+            // console.log(myobj, myobj.geometry) //mesh才有geometry，group等都没有
+
+            // console.log(monu.children[0].geometry)
+
+            this.addPartice(monu.children[0].geometry)
 
 
 
@@ -259,6 +271,32 @@ class ThreeDemo {
         dragControls.addEventListener("dragstart", (e) => { this.orbitControls.enabled = false })
         dragControls.addEventListener("dragend", (e) => { this.orbitControls.enabled = true })
 
+    }
+    toBufferGeometry(geometry) {
+        if (geometry.type === "BufferGeometry") return geometry;
+        return new THREE.BufferGeometry().fromGeometry(geometry)
+    }
+
+    addPartice(obj) {
+        obj = this.toBufferGeometry(obj);
+        let uniforms = {
+            color: {
+                type: 'v3',
+                value: new THREE.Color(0xffffff)
+            }
+        }
+
+        let shadowMaterial = new THREE.ShaderMaterial({
+            uniforms,
+            vertexShader,
+            fragmentShader,
+            blending: THREE.AdditiveBlending,
+            depthTest: false,
+            transparent: true
+        })
+
+        let particleSystem = new THREE.Points(obj, shadowMaterial)
+        this.scene.add(particleSystem)
     }
 
     initStats() {
