@@ -445,9 +445,9 @@ class ThreeDemo {
     }
 }
 
-// new ThreeDemo({
-//     el: document.getElementsByClassName("container")[0],
-// })
+new ThreeDemo({
+    el: document.getElementsByClassName("container")[0],
+})
 
 
 if (module.hot) {
