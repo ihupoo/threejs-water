@@ -22,15 +22,30 @@ class ThreeDemo {
         this.bufferTexture = new THREE.WebGLRenderTarget(
             512, 512, {
                 minFilter: THREE.LinearFilter,
-                magFilter: THREE.NearestFilter
+                magFilter: THREE.NearestFilter,
+                type: THREE.FloatType,
+                stencilBuffer: false,
+                depthBuffer: false
             });
         this.bufferTexture2 = new THREE.WebGLRenderTarget(
             512, 512, {
                 minFilter: THREE.LinearFilter,
-                magFilter: THREE.NearestFilter
+                magFilter: THREE.NearestFilter,
+                type: THREE.FloatType,
+                stencilBuffer: false,
+                depthBuffer: false
             });
+
+        this.bufferTexture.texture = this.getTexture();
+        this.bufferTexture2.texture = this.getTexture();
+
+
         this.aorb = true;
-        this.mouse = new THREE.Vector2();
+        this.mouse = new THREE.Vector2(0.0, 0.0)
+
+
+        this.addDrop()
+        this.updateProgram()
 
         this.addMouseListener();
         this.load();
@@ -42,6 +57,22 @@ class ThreeDemo {
 
         this.update() //循环更新场景
     }
+
+    getTexture(canvasSize = 512) {
+        let canvas = document.createElement('canvas');
+        canvas.width = canvasSize;
+        canvas.height = canvasSize;
+
+        let context = canvas.getContext('2d');
+
+        context.fillStyle = "#000000";
+
+        context.fillRect(0, 0, 512, 512);
+        let texture = new THREE.Texture(canvas);
+        texture.needsUpdate = true;
+        return texture;
+    }
+
 
     createScene() {
         this.WIDTH = this.container.clientWidth;
@@ -103,19 +134,6 @@ class ThreeDemo {
         this.scene.add(this.directionalLight);
     }
 
-    getTexture(canvasSize = 512) {
-        let canvas = document.createElement('canvas');
-        canvas.width = 512;
-        canvas.height = 512;
-
-        let context = canvas.getContext('2d');
-        context.fillStyle = "#000"
-        context.fillRect(0, 0, 512, 512);
-        let texture = new THREE.Texture(canvas);
-        texture.needsUpdate = true;
-        return texture;
-    }
-
 
     load() {
         let textureLoader = new THREE.TextureLoader();
@@ -123,9 +141,7 @@ class ThreeDemo {
             tiles,
             texture => {
                 this.texturebase = texture;
-
-                this.bufferTexture.texture = this.getTexture();
-                this.bufferTexture2.texture = this.getTexture();
+                this.renderfn();
             },
             xhr => console.log(`${xhr.loaded/xhr.total *100}%loaded`),
             error => console.log(error)
@@ -135,7 +151,7 @@ class ThreeDemo {
 
     renderfn() {
 
-        let plane = new THREE.PlaneBufferGeometry(this.WIDTH, this.HEIGHT, 512, 512);
+        let plane = new THREE.PlaneBufferGeometry(512, 512, 512, 512);
 
 
         let uniforms = {
@@ -161,9 +177,9 @@ class ThreeDemo {
         })
 
 
-        let mesh = new THREE.Mesh(plane, material);
+        this.rendermesh = new THREE.Mesh(plane, material);
 
-        this.scene.add(mesh)
+        this.scene.add(this.rendermesh)
 
         this.renderer.render(this.scene, this.camera);
 
@@ -171,11 +187,10 @@ class ThreeDemo {
     }
 
     updateProgram() {
-        let bufferScene = new THREE.Scene();
+        this.bufferScene2 = new THREE.Scene();
 
 
-        let plane = new THREE.PlaneBufferGeometry(512, 512);
-        let camera = new THREE.OrthographicCamera(-512, 512, 512, -512, 0, 512);
+        let plane = new THREE.PlaneBufferGeometry(512, 512, 512, 512);
 
         let uniforms = {
             texture: {
@@ -194,25 +209,23 @@ class ThreeDemo {
         })
 
 
-        let mesh = new THREE.Mesh(plane, material);
+        this.mesh2 = new THREE.Mesh(plane, material);
 
-        bufferScene.add(mesh);
+        this.bufferScene.add(this.mesh2);
 
 
-        this.renderer.render(bufferScene, this.camera,
+        this.renderer.render(this.bufferScene2, this.camera,
             this.aorb ? this.bufferTexture : this.bufferTexture2
         );
-        // this.bufferTexture.texture.needsUpdate = true;
 
         this.aorb = !this.aorb;
     }
 
     addDrop() {
-        let bufferScene = new THREE.Scene();
+        this.bufferScene = new THREE.Scene();
 
 
         let plane = new THREE.PlaneBufferGeometry(512, 512, 512, 512);
-        let camera = new THREE.OrthographicCamera(-512, 512, 512, -512, 0, 512);
 
         let uniforms = {
             texture: {
@@ -222,7 +235,7 @@ class ThreeDemo {
                 value: this.mouse
             },
             radius: {
-                value: 0.02
+                value: 0.1
             },
             strength: {
                 value: 1.0
@@ -236,17 +249,16 @@ class ThreeDemo {
             depthTest: false
         })
 
-        console.log(plane)
 
-        let mesh = new THREE.Mesh(plane, material);
+        this.mesh = new THREE.Mesh(plane, material);
 
-        bufferScene.add(mesh);
+        this.bufferScene.add(this.mesh);
 
-        mesh.material.uniforms.center.value = this.mouse;
+        // this.mesh.material.uniforms.center.value = this.mouse;
 
-        this.renderer.render(bufferScene, this.camera, this.aorb ? this.bufferTexture2 : this.bufferTexture);
-        this.bufferTexture.texture.needsUpdate = true;
-        this.bufferTexture2.texture.needsUpdate = true;
+        this.renderer.render(this.bufferScene, this.camera, this.aorb ? this.bufferTexture2 : this.bufferTexture);
+        // this.bufferTexture.texture.needsUpdate = true;
+        // this.bufferTexture2.texture.needsUpdate = true;
 
         this.aorb = !this.aorb;
     }
@@ -258,17 +270,18 @@ class ThreeDemo {
             this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
             this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
-            console.log(this.mouse)
-            this.addDrop();
-            // this.updateProgram();
-            // this.renderfn();
 
-            this.downtrue = true;
-        })
-        this.container.addEventListener("mouseup", event => {
+            this.mesh.material.uniforms.center.value = this.mouse;
+            this.mesh.material.uniforms.texture.value = this.aorb ? this.bufferTexture.texture : this.bufferTexture2.texture
 
-            this.downtrue = false;
+            this.renderer.render(this.bufferScene, this.camera, this.aorb ? this.bufferTexture2 : this.bufferTexture);
+            this.aorb = !this.aorb;
+
+
+
+
         })
+
     }
 
     initStats() {
@@ -285,17 +298,21 @@ class ThreeDemo {
         this.stats.update(); // 性能监测插件
 
         if (this.texturebase) {
-            this.updateProgram();
-            this.renderfn();
+
+            this.mesh2.material.uniforms.texture.value = this.aorb ? this.bufferTexture2.texture : this.bufferTexture.texture;
+
+            this.renderer.render(this.bufferScene2, this.camera,
+                this.aorb ? this.bufferTexture : this.bufferTexture2
+            );
+            this.aorb = !this.aorb;
+
+
+            this.rendermesh.material.uniforms.samplerRipples.value = this.bufferTexture.texture
+
+
             this.bufferTexture.texture.needsUpdate = true;
             this.bufferTexture2.texture.needsUpdate = true;
         }
-
-        // setTimeout(() => {
-
-        // }, 1000);
-
-
 
 
 
