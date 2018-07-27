@@ -17,9 +17,15 @@ void main(){
         texture2D(texture, coord + dx).r +
         texture2D(texture, coord + dy).r)*0.25;
 
-    info.g += (average - info.r) * 2.0;
-    info.g *= 0.995;
-    info.r += info.g;
+    // info.g += (average - info.r) * 2.0;
+    float a = info.r;
+    float b = info.g;
+
+    info.g  = b + average  * 2.0  -  a * 2.0 ;
+
+    info.r = b  + average  * 2.0  -  a ;
+
+
 
     gl_FragColor = info;
 

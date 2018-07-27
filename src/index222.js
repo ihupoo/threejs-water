@@ -36,21 +36,19 @@ class ThreeDemo {
                 depthBuffer: false
             });
 
+        this.bufferTexture.texture = this.getTexture();
+        this.bufferTexture2.texture = this.getTexture();
+
 
         this.aorb = true;
         this.mouse = new THREE.Vector2(0.0, 0.0)
 
 
-        this.lazy = true;
-
         this.addDrop()
         this.updateProgram()
 
         this.addMouseListener();
-
-        this.load()
-
-
+        this.load();
 
         // this.orbitControls = new THREE.OrbitControls(this.camera); //轨道控制插件
         // this.orbitControls.autoRotate = true;
@@ -60,6 +58,20 @@ class ThreeDemo {
         this.update() //循环更新场景
     }
 
+    getTexture(canvasSize = 512) {
+        let canvas = document.createElement('canvas');
+        canvas.width = canvasSize;
+        canvas.height = canvasSize;
+
+        let context = canvas.getContext('2d');
+
+        context.fillStyle = "#000000";
+
+        context.fillRect(0, 0, 512, 512);
+        let texture = new THREE.Texture(canvas);
+        texture.needsUpdate = true;
+        return texture;
+    }
 
 
     createScene() {
@@ -84,7 +96,6 @@ class ThreeDemo {
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap; //阴影类型-柔化边缘的软阴影映射
 
-
         this.container.appendChild(this.renderer.domElement);
         window.addEventListener('resize', this.handleWindowResize.bind(this))
 
@@ -99,8 +110,6 @@ class ThreeDemo {
         this.renderer.setSize(this.WIDTH, this.HEIGHT);
 
     }
-
-
 
     createLight() {
         //户外光源
@@ -125,128 +134,6 @@ class ThreeDemo {
         this.scene.add(this.directionalLight);
     }
 
-    addDrop() {
-        this.bufferScene = new THREE.Scene();
-
-
-        let plane = new THREE.PlaneBufferGeometry(512, 512, 512, 512);
-
-        let uniforms = {
-            texture: {
-                value: this.bufferTexture.texture
-            },
-            center: {
-                value: this.mouse
-            },
-            radius: {
-                value: 20 / 512
-            },
-            strength: {
-                value: 1.0
-            }
-        }
-        let material = new THREE.ShaderMaterial({
-            uniforms,
-            vertexShader: vertexShader,
-            fragmentShader: dropfragmentShader,
-            blending: THREE.AdditiveBlending,
-            depthTest: false
-        })
-
-
-        this.mesh = new THREE.Mesh(plane, material);
-
-        this.bufferScene.add(this.mesh);
-
-        // this.mesh.material.uniforms.center.value = this.mouse;
-
-        this.renderer.render(this.bufferScene, this.camera, this.bufferTexture2);
-        // this.bufferTexture.texture.needsUpdate = true;
-        // this.bufferTexture2.texture.needsUpdate = true;
-
-    }
-
-    addMouseListener() {
-        this.container.addEventListener("mousedown", event => {
-
-            let rect = this.renderer.domElement.getBoundingClientRect();
-            this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-            this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-
-            this.mouseFn()
-
-        })
-        this.container.addEventListener("mousemove", event => {
-
-            let rect = this.renderer.domElement.getBoundingClientRect();
-            this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-            this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-
-
-
-            this.mouseFn()
-
-        }, false)
-
-
-
-    }
-
-    mouseFn() {
-        this.mesh.material.uniforms.center.value = this.mouse;
-
-        [this.bufferTexture, this.bufferTexture2] = [this.bufferTexture2, this.bufferTexture]
-
-        this.mesh.material.uniforms.texture.value = this.bufferTexture.texture
-
-        this.renderer.render(this.bufferScene, this.camera, this.bufferTexture2);
-    }
-
-
-
-
-    updateProgram() {
-
-
-        this.bufferScene2 = new THREE.Scene();
-
-
-        let plane = new THREE.PlaneBufferGeometry(512, 512, 512, 512);
-
-        let uniforms = {
-            texture: {
-                value: this.bufferTexture2.texture
-            },
-            delta: {
-                value: new THREE.Vector2(1 / 512, 1 / 512)
-            }
-        }
-        let material = new THREE.ShaderMaterial({
-            uniforms,
-            vertexShader: vertexShader,
-            fragmentShader: updatefragmentShader,
-            blending: THREE.AdditiveBlending,
-            depthTest: false
-        })
-
-
-        this.mesh2 = new THREE.Mesh(plane, material);
-
-        this.bufferScene2.add(this.mesh2);
-
-        this.renderer.render(this.bufferScene2, this.camera, this.bufferTexture);
-
-    }
-
-
-    initStats() {
-        this.stats = new Stats();
-        this.stats.domElement.style.position = "absolute";
-        this.stats.domElement.style.bottom = "0px";
-        this.stats.domElement.style.zIndex = 100;
-
-        this.container.appendChild(this.stats.domElement);
-    }
 
     load() {
         let textureLoader = new THREE.TextureLoader();
@@ -254,7 +141,7 @@ class ThreeDemo {
             tiles,
             texture => {
                 this.texturebase = texture;
-                this.rendersth();
+                this.renderfn();
             },
             xhr => console.log(`${xhr.loaded/xhr.total *100}%loaded`),
             error => console.log(error)
@@ -262,7 +149,7 @@ class ThreeDemo {
     }
 
 
-    rendersth() {
+    renderfn() {
 
         let plane = new THREE.PlaneBufferGeometry(512, 512, 512, 512);
 
@@ -294,30 +181,140 @@ class ThreeDemo {
 
         this.scene.add(this.rendermesh)
 
+        this.renderer.render(this.scene, this.camera);
+
+
     }
+
+    updateProgram() {
+        this.bufferScene2 = new THREE.Scene();
+
+
+        let plane = new THREE.PlaneBufferGeometry(512, 512, 512, 512);
+
+        let uniforms = {
+            texture: {
+                value: this.aorb ? this.bufferTexture2.texture : this.bufferTexture.texture
+            },
+            delta: {
+                value: new THREE.Vector2(1 / 512, 1 / 512)
+            }
+        }
+        let material = new THREE.ShaderMaterial({
+            uniforms,
+            vertexShader: vertexShader,
+            fragmentShader: updatefragmentShader,
+            blending: THREE.AdditiveBlending,
+            depthTest: false
+        })
+
+
+        this.mesh2 = new THREE.Mesh(plane, material);
+
+        this.bufferScene.add(this.mesh2);
+
+
+        this.renderer.render(this.bufferScene2, this.camera, this.aorb ? this.bufferTexture : this.bufferTexture2);
+
+        this.aorb = !this.aorb;
+    }
+
+    addDrop() {
+        this.bufferScene = new THREE.Scene();
+
+
+        let plane = new THREE.PlaneBufferGeometry(512, 512, 512, 512);
+
+        let uniforms = {
+            texture: {
+                value: this.aorb ? this.bufferTexture.texture : this.bufferTexture2.texture
+            },
+            center: {
+                value: this.mouse
+            },
+            radius: {
+                value: 0.1
+            },
+            strength: {
+                value: 1.0
+            }
+        }
+        let material = new THREE.ShaderMaterial({
+            uniforms,
+            vertexShader: vertexShader,
+            fragmentShader: dropfragmentShader,
+            blending: THREE.AdditiveBlending,
+            depthTest: false
+        })
+
+
+        this.mesh = new THREE.Mesh(plane, material);
+
+        this.bufferScene.add(this.mesh);
+
+        // this.mesh.material.uniforms.center.value = this.mouse;
+
+        this.renderer.render(this.bufferScene, this.camera, this.aorb ? this.bufferTexture2 : this.bufferTexture);
+        // this.bufferTexture.texture.needsUpdate = true;
+        // this.bufferTexture2.texture.needsUpdate = true;
+
+        this.aorb = !this.aorb;
+    }
+
+    addMouseListener() {
+        this.container.addEventListener("mousedown", event => {
+
+            let rect = this.renderer.domElement.getBoundingClientRect();
+            this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+
+            this.mesh.material.uniforms.center.value = this.mouse;
+            this.mesh.material.uniforms.texture.value = this.aorb ? this.bufferTexture.texture : this.bufferTexture2.texture
+
+            this.renderer.render(this.bufferScene, this.camera, this.aorb ? this.bufferTexture2 : this.bufferTexture);
+            this.aorb = !this.aorb;
+
+
+
+
+        })
+
+    }
+
+    initStats() {
+        this.stats = new Stats();
+        this.stats.domElement.style.position = "absolute";
+        this.stats.domElement.style.bottom = "0px";
+        this.stats.domElement.style.zIndex = 100;
+
+        this.container.appendChild(this.stats.domElement);
+    }
+
 
     update() {
         this.stats.update(); // 性能监测插件
 
+        if (this.texturebase) {
+
+            this.mesh2.material.uniforms.texture.value = this.aorb ? this.bufferTexture2.texture : this.bufferTexture.texture;
+
+            this.renderer.render(this.bufferScene2, this.camera,
+                this.aorb ? this.bufferTexture : this.bufferTexture2
+            );
+            this.aorb = !this.aorb;
 
 
-
-        this.mesh2.material.uniforms.texture.value = this.bufferTexture2.texture
-
-        this.renderer.render(this.bufferScene2, this.camera, this.bufferTexture);
+            this.rendermesh.material.uniforms.samplerRipples.value = this.bufferTexture.texture
 
 
-        if (this.rendermesh) {
-
-            this.rendermesh.material.uniforms.samplerRipples.value = this.bufferTexture.texture;
+            this.bufferTexture.texture.needsUpdate = true;
+            this.bufferTexture2.texture.needsUpdate = true;
         }
 
 
 
-        [this.bufferTexture, this.bufferTexture2] = [this.bufferTexture2, this.bufferTexture]
-
-
-        this.renderer.render(this.scene, this.camera); // 渲染器执行渲染
+        // this.renderer.render(this.scene, this.camera); // 渲染器执行渲染
         requestAnimationFrame(() => {
             this.update() // 循环调用
         });
