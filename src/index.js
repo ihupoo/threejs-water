@@ -41,8 +41,6 @@ class ThreeDemo {
         this.mouse = new THREE.Vector2(0.0, 0.0)
 
 
-        this.lazy = true;
-
         this.addDrop()
         this.updateProgram()
 

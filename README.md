@@ -1,5 +1,4 @@
 # threejs-water
 
-一个three.js的demo，一步步学习到最终展示一个水纹效果，集成webpack4。
+一个three.js的水纹效果demo，参考了jquery.ripples.js的实现，集成webpack4。
 
-coding...
